@@ -16,7 +16,7 @@ type Server interface {
 	// method是HTTP方法
 	// path 是路由
 	// HandleFunc 是你的业务逻辑
-	AddRoute(method string, path string, handleFunc HandleFunc)
+	addRoute(method string, path string, handleFunc HandleFunc)
 	// AddRoute1 这种允许注册多个，没有必要提供
 	// 让用户自己去管理
 	AddRoute1(method string, path string, handles ...HandleFunc)
@@ -26,8 +26,17 @@ type Server interface {
 //	HTTPServer
 //}
 
-type HTTPServer struct{}
+type HTTPServer struct {
+	*router
+}
 
+func NewHTTPServer() *HTTPServer {
+	return &HTTPServer{
+		router: newRouter(),
+	}
+}
+
+// ServeHTTP 处理请求的入口
 func (h *HTTPServer) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	// 你的框架代码就在这里
 	ctx := &Context{
@@ -47,21 +56,21 @@ func (h *HTTPServer) AddRoute1(method string, path string, handles ...HandleFunc
 	panic("implement me")
 }
 
-func (h *HTTPServer) AddRoute(method string, path string, handleFunc HandleFunc) {
-	// 这里注册到路由树里面
-	panic("implement me")
-}
+//func (h *HTTPServer) addRoute(method string, path string, handleFunc HandleFunc) {
+//	// 这里注册到路由树里面
+//	panic("implement me")
+//}
 
 func (h *HTTPServer) Get(path string, handleFunc HandleFunc) {
-	h.AddRoute(http.MethodGet, path, handleFunc)
+	h.addRoute(http.MethodGet, path, handleFunc)
 }
 
 func (h *HTTPServer) Post(path string, handleFunc HandleFunc) {
-	h.AddRoute(http.MethodPost, path, handleFunc)
+	h.addRoute(http.MethodPost, path, handleFunc)
 
 }
 func (h *HTTPServer) Options(path string, handleFunc HandleFunc) {
-	h.AddRoute(http.MethodOptions, path, handleFunc)
+	h.addRoute(http.MethodOptions, path, handleFunc)
 }
 
 func (h *HTTPServer) Start(addr string) error {
