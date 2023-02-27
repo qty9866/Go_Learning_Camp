@@ -105,10 +105,14 @@ func (r *router) findRoute(method string, path string) (*node, bool) {
 
 type node struct {
 	path string
-	// path 到子节点的映射
+	// children 子节点
+	// 子节点的path=>node
 	children map[string]*node
-	// 缺一个代表用户注册的业务逻辑
+	// handler 命中路由之后执行的逻辑
 	handler HandleFunc
+
+	// 通配符*表达的节点，任意匹配
+	starChild *node
 }
 
 func (n *node) childOfCreate(seg string) *node {
@@ -126,10 +130,14 @@ func (n *node) childOfCreate(seg string) *node {
 	return res
 }
 
+// 通配符更改
 func (n *node) childOf(path string) (*node, bool) {
 	if n.children == nil {
-		return nil, false
+		return n.starChild, n.starChild != nil
 	}
 	child, ok := n.children[path]
+	if !ok {
+		return n.starChild, n.starChild != nil
+	}
 	return child, ok
 }

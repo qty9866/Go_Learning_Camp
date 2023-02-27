@@ -10,25 +10,25 @@ func TestServer(t *testing.T) {
 	h := &HTTPServer{}           // NewServer
 	var _ Server = &HTTPServer{} // NewServer
 
-	h.addRoute(http.MethodGet, "/user", func(ctx Context) {
+	h.addRoute(http.MethodGet, "/user", func(ctx *Context) {
 		fmt.Println("处理第一件事")
 		fmt.Println("处理第二件事")
 	})
 
-	handler1 := func(ctx Context) {
+	handler1 := func(ctx *Context) {
 		fmt.Println("处理第一件事")
 	}
-	handler2 := func(ctx Context) {
+	handler2 := func(ctx *Context) {
 		fmt.Println("处理第一件事")
 	}
 
 	// 用户自己去管这种
-	h.addRoute(http.MethodGet, "/user", func(ctx Context) {
+	h.addRoute(http.MethodGet, "/user", func(ctx *Context) {
 		handler1(ctx)
 		handler2(ctx)
 	})
 
-	h.Get("/user", func(ctx Context) {
+	h.Get("/user", func(ctx *Context) {
 
 	})
 
