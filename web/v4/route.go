@@ -96,16 +96,24 @@ type node struct {
 	// handler 命中路由之后执行的逻辑
 	handler HandleFunc
 
+	// 加一个路径参数
+	paramChild *node
 	// 通配符 * 表达的节点，任意匹配
 	starChild *node
 }
 
 func (n *node) childOf(path string) (*node, bool) {
 	if n.children == nil {
+		if n.paramChild != nil {
+			return n.paramChild, true
+		}
 		return n.starChild, n.starChild != nil
 	}
 	res, ok := n.children[path]
 	if !ok {
+		if n.paramChild != nil {
+			return n.paramChild, true
+		}
 		return n.starChild, n.starChild != nil
 	}
 	return res, ok
@@ -114,6 +122,13 @@ func (n *node) childOf(path string) (*node, bool) {
 // childOrCreate 查找子节点，如果子节点不存在就创建一个
 // 并且将子节点放回去了 children 中
 func (n *node) childOrCreate(path string) *node {
+	if path[0] == ':' {
+		n.starChild = &node{
+			path: path,
+		}
+		return n.paramChild
+	}
+
 	if path == "*" {
 		if n.starChild == nil {
 			n.starChild = &node{path: "*"}

@@ -58,6 +58,10 @@ func Test_router_AddRoute(t *testing.T) {
 			method: http.MethodGet,
 			path:   "/*/abc/*",
 		},
+		{
+			method: http.MethodGet,
+			path:   "/order/detail/:id",
+		},
 	}
 
 	mockHandler := func(ctx *Context) {}
@@ -84,7 +88,12 @@ func Test_router_AddRoute(t *testing.T) {
 						children: map[string]*node{
 							"detail": &node{
 								path:    "detail",
-								handler: mockHandler},
+								handler: mockHandler,
+								paramChild: &node{
+									path:    ":id",
+									handler: mockHandler,
+								},
+							},
 						},
 						starChild: &node{
 							path:    "*",
@@ -170,6 +179,13 @@ func (n *node) equal(y *node) (string, bool) {
 	}
 	if n.path != y.path {
 		return fmt.Sprintf("%s 节点 path 不相等 x %s, y %s", n.path, n.path, y.path), false
+	}
+
+	if n.paramChild != nil {
+		msg, ok := n.paramChild.equal(y.paramChild)
+		if !ok {
+			return msg, ok
+		}
 	}
 
 	nhv := reflect.ValueOf(n.handler)
