@@ -19,8 +19,8 @@ type sdkHttpServer struct {
 func (s *sdkHttpServer) Route(
 	method string,
 	pattern string,
-	handleFunc func(ctx *Context) ) {
-	key := s.
+	handleFunc func(ctx *Context)) {
+
 }
 func (s *sdkHttpServer) Start(address string) error {
 	return http.ListenAndServe(address, nil)

@@ -312,6 +312,7 @@ func TestRouter_findRoute(t *testing.T) {
 		path      string
 		wantFound bool
 		wantNode  *node
+		info      *matchInfo
 	}{
 		{
 			// 方法都不存在
@@ -325,9 +326,11 @@ func TestRouter_findRoute(t *testing.T) {
 			method:    http.MethodGet,
 			path:      "/order/detail",
 			wantFound: true,
-			wantNode: &node{
-				path:    "detail",
-				handler: mockHandler,
+			info: &matchInfo{
+				n: &node{
+					handler: mockHandler,
+					path:    "*",
+				},
 			},
 		},
 		{
@@ -336,6 +339,12 @@ func TestRouter_findRoute(t *testing.T) {
 			method:    http.MethodDelete,
 			path:      "/",
 			wantFound: true,
+			info: &matchInfo{
+				n: &node{
+					handler: mockHandler,
+					path:    "*",
+				},
+			},
 			wantNode: &node{
 				path:    "/",
 				handler: mockHandler,
@@ -351,14 +360,16 @@ func TestRouter_findRoute(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			n, found := r.findRoute(tc.method, tc.path)
+			mi, found := r.findRoute(tc.method, tc.path)
 			assert.Equal(t, tc.wantFound, found)
 			if !found {
 				return
 			}
-			assert.Equal(t, tc.wantNode.path, n.path)
-			msg, ok := tc.wantNode.equal(n)
-			assert.True(t, ok, msg)
+			assert.Equal(t, tc.info.pathParams, mi.pathParams)
+			n := mi.n
+			wantVal := reflect.ValueOf(tc.info.n.handler)
+			nVal := reflect.ValueOf(n.handler)
+			assert.Equal(t, wantVal, nVal)
 		})
 	}
 }

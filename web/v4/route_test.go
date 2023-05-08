@@ -349,9 +349,9 @@ func Test_router_findRoute(t *testing.T) {
 			if !found {
 				return
 			}
-			assert.Equal(t, tc.wantNode.path, n.path)
+			assert.Equal(t, tc.wantNode.path, n.n.path)
 			wantVal := reflect.ValueOf(tc.wantNode.handler)
-			nVal := reflect.ValueOf(n.handler)
+			nVal := reflect.ValueOf(n.n.handler)
 			assert.Equal(t, wantVal, nVal)
 		})
 	}

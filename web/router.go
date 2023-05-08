@@ -77,7 +77,7 @@ func (r *router) addRoute(method string, path string, handleFunc web.HandleFunc)
 	root.handler = handleFunc
 }
 
-func (r *router) findRoute(method string, path string) (*node, bool) {
+func (r *router) findRoute(method string, path string) (*matchInfo, bool) {
 	// 基本上也是沿着树深度遍历查找下去
 	root, ok := r.trees[method]
 	if !ok {
@@ -85,23 +85,35 @@ func (r *router) findRoute(method string, path string) (*node, bool) {
 	}
 
 	if path == "/" {
-		return root, true
+		return &matchInfo{
+			n:          root,
+			pathParams: nil,
+		}, true
 	}
 	//这里把前置和后置的"/"都去掉
 	path = strings.Trim(path, "/")
 
 	// 按照"/"切割
 	segs := strings.Split(path, "/")
+	pathParams := make(map[string]string)
 	for _, seg := range segs {
-		child, found := root.childOf(seg)
+		child, paramChild, found := root.childOf(seg)
 		if !found {
 			return nil, false
+		}
+		// 命中了路径参数
+		if paramChild {
+			// 因为path是":id"这种形式，所以要去掉：
+			pathParams[child.path[1:]] = seg
 		}
 		root = child
 	}
 	// 代表我确实有这个节点
 	// 但是节点是不是用户注册的有Handler方法的我就不知道了
-	return root, true
+	return &matchInfo{
+		n:          root,
+		pathParams: pathParams,
+	}, true
 }
 
 type node struct {
@@ -113,7 +125,8 @@ type node struct {
 	// 加一个通配符匹配
 	starChild *node
 	// 缺一个代表用户注册的业务逻辑
-	handler web.HandleFunc
+	handler    web.HandleFunc
+	paramChild *node
 }
 
 func (n *node) childOfCreate(seg string) *node {
@@ -131,10 +144,24 @@ func (n *node) childOfCreate(seg string) *node {
 	return res
 }
 
-func (n *node) childOf(path string) (*node, bool) {
+func (n *node) childOf(path string) (*node, bool, bool) {
 	if n.children == nil {
-		return nil, false
+		if n.paramChild != nil {
+			return n.paramChild, true, true
+		}
+		return n.starChild, false, n.starChild != nil
 	}
-	child, ok := n.children[path]
-	return child, ok
+	res, ok := n.children[path]
+	if !ok {
+		if n.paramChild != nil {
+			return n.paramChild, true, true
+		}
+		return n.starChild, false, n.starChild != nil
+	}
+	return res, false, ok
+}
+
+type matchInfo struct {
+	n          *node
+	pathParams map[string]string
 }

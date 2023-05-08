@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -13,6 +14,21 @@ func TestServer(t *testing.T) {
 	})
 	s.Get("/user", func(ctx *Context) {
 		ctx.Resp.Write([]byte("hello, user"))
+	})
+
+	s.Post("/form", func(ctx *Context) {
+		ctx.Req.ParseForm()
+		ctx.Resp.Write([]byte("hello form"))
+	})
+
+	s.Get("/values/:id", func(ctx *Context) {
+		id, err := ctx.PathValueV1("id").AsInt64()
+		if err != nil {
+			ctx.Resp.WriteHeader(400)
+			ctx.Resp.Write([]byte("web: id輸入錯誤"))
+			return
+		}
+		ctx.Resp.Write([]byte(fmt.Sprintf("hello,%d", id)))
 	})
 
 	s.Start(":8081")
