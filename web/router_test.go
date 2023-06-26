@@ -1,7 +1,6 @@
 package web
 
 import (
-	"Go_Learning_Camp/web/v1"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -46,7 +45,7 @@ func TestRouter_AddRoute(t *testing.T) {
 		},
 	}
 
-	var mockHandler web.HandleFunc = func(ctx *web.Context) {}
+	var mockHandler HandleFunc = func(ctx *Context) {}
 	r := newRouter()
 	for _, route := range testRoutes {
 		r.addRoute(route.method, route.path, mockHandler)
@@ -301,7 +300,7 @@ func TestRouter_findRoute(t *testing.T) {
 	}
 
 	r := newRouter()
-	var mockHandler web.HandleFunc = func(ctx *web.Context) {}
+	var mockHandler HandleFunc = func(ctx *Context) {}
 	for _, route := range testRoute {
 		r.addRoute(route.method, route.path, mockHandler)
 	}

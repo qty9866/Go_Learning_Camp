@@ -6,6 +6,8 @@ import (
 
 type HandleFunc func(ctx *Context)
 
+type Middleware func(next HandleFunc) HandleFunc
+
 type Server interface {
 	http.Handler
 	// Start 启动服务器
@@ -23,26 +25,14 @@ type Server interface {
 // 确保 HTTPServer 肯定实现了 Server 接口
 var _ Server = &HTTPServer{}
 
-type HTTPServerOption func(server *HTTPServer)
-
 type HTTPServer struct {
-	*router
+	router
 	mdl []Middleware
 }
 
-func NewHTTPServer(opts ...HTTPServerOption) *HTTPServer {
-	res := &HTTPServer{
+func NewHTTPServer() *HTTPServer {
+	return &HTTPServer{
 		router: newRouter(),
-	}
-	for _, opt := range opts {
-		opt(res)
-	}
-	return res
-}
-
-func ServerWithMiddleware(mdls ...Middleware) HTTPServerOption {
-	return func(server *HTTPServer) {
-		server.mdl = mdls
 	}
 }
 
@@ -71,8 +61,6 @@ func (h *HTTPServer) serve(ctx *Context) {
 		_, _ = ctx.Resp.Write([]byte("NOT FOUND"))
 		return
 	}
-	ctx.PathParams = info.pathParams
-	ctx.MatchedRoute = info.n.route
 }
 
 // Start 启动服务器

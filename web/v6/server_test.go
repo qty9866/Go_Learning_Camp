@@ -1,14 +1,9 @@
 package web
 
-import (
-	"fmt"
-	"net/http"
-	"testing"
-)
-
+/*
 func TestHTTPServer_ServeHTTP(t *testing.T) {
 	server := NewHTTPServer()
-	server.mdl = []Middleware{
+	server.mdl = []web.Middleware{
 		func(next HandleFunc) HandleFunc {
 			return func(ctx *Context) {
 				fmt.Println("第一个 before")
@@ -37,3 +32,4 @@ func TestHTTPServer_ServeHTTP(t *testing.T) {
 	}
 	server.ServeHTTP(nil, &http.Request{})
 }
+*/

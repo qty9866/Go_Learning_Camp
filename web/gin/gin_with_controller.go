@@ -9,5 +9,4 @@ type UserController struct{}
 func (c *UserController) GetUser(ctx *gin.Context) {
 	//panic("something wrong!")
 	ctx.String(200, "this is Hello form Hud")
-	gin.HandlersChain{}
 }

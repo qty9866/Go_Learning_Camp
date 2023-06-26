@@ -1,6 +1,7 @@
 package web
 
 import (
+	"Go_Learning_Camp/web"
 	"fmt"
 	"net/http"
 	"testing"
@@ -8,7 +9,7 @@ import (
 
 func TestHTTPServer_ServeHTTP(t *testing.T) {
 	server := NewHTTPServer()
-	server.mdl = []Middleware{
+	server.mdl = []web.Middleware{
 		func(next HandleFunc) HandleFunc {
 			return func(ctx *Context) {
 				fmt.Println("第一个 before")

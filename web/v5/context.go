@@ -15,9 +15,6 @@ type Context struct {
 
 	// 缓存的数据
 	cacheQueryValues url.Values
-
-	// accessLog中记录命中的路由
-	MatchedRoute string
 }
 
 func (c *Context) BindJSON(val any) error {

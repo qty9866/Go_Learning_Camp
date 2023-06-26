@@ -1,6 +1,7 @@
 package web
 
 import (
+	"net"
 	"net/http"
 )
 
@@ -23,28 +24,18 @@ type Server interface {
 // 确保 HTTPServer 肯定实现了 Server 接口
 var _ Server = &HTTPServer{}
 
-type HTTPServerOption func(server *HTTPServer)
-
 type HTTPServer struct {
-	*router
+	router
 	mdl []Middleware
 }
 
-func NewHTTPServer(opts ...HTTPServerOption) *HTTPServer {
-	res := &HTTPServer{
+func NewHTTPServer() *HTTPServer {
+	return &HTTPServer{
 		router: newRouter(),
 	}
-	for _, opt := range opts {
-		opt(res)
-	}
-	return res
 }
 
-func ServerWithMiddleware(mdls ...Middleware) HTTPServerOption {
-	return func(server *HTTPServer) {
-		server.mdl = mdls
-	}
-}
+type Middleware func(next HandleFunc) HandleFunc
 
 // ServeHTTP HTTPServer 处理请求的入口
 func (h *HTTPServer) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
@@ -72,12 +63,16 @@ func (h *HTTPServer) serve(ctx *Context) {
 		return
 	}
 	ctx.PathParams = info.pathParams
-	ctx.MatchedRoute = info.n.route
+	ctx.MatchedRoute = info.n.path
 }
 
-// Start 启动服务器
+// Start 启动服务器 用户指定端口
 func (h *HTTPServer) Start(addr string) error {
-	return http.ListenAndServe(addr, h)
+	l, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+	return http.Serve(l, h)
 }
 
 func (h *HTTPServer) Post(path string, handler HandleFunc) {
